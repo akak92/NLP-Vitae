@@ -10,11 +10,20 @@ services:
       - 8888:8888
     command: uvicorn app:app --reload --host 0.0.0.0 --port 8888
 
+  ocr:
+    build:
+      context: ./Services/OCR
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8880:8880
+    command: uvicorn app:app --reload --host 0.0.0.0 --port 8880
+
   mongo:
     image: mongo:latest
     restart: unless-stopped
     ports:
-      - 27017:27017
+      - 27018:27017
     volumes:
       - ./Services/Mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
     environment:
