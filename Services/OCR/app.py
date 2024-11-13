@@ -22,5 +22,5 @@ def tversion() -> JSONResponse:
     except Exception as err:
         return JSONResponse(
             status_code=500,
-            content = {'message' : f'An error ocurred {err}'}
+            content = {'message' : f'An exception ocurred: {err}'}
         )

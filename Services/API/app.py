@@ -1,11 +1,59 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
+from pymongo import MongoClient
+from gridfs import GridFS
+import os
+import uuid
+import base64
+from Components.Mongo.mongo_connection import mongoDB_connection
 
 app = FastAPI(title='API for NLP-Vitae application')
 
 @app.get('/health', summary='Health check endpoint', description="Returns OK value if the service is up.", tags=['Health'])
-def health() -> JSONResponse:
+async def health() -> JSONResponse:
     return JSONResponse(
         status_code=200,
         content={'status' : 'API Service is OK'}
     )
+
+
+@app.post('/upload', summary='Upload a PDF file and save it in MongoDB', description="Returns OK if the file is uploaded correctly", tags=['Upload'])
+async def upload(file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        # Define the path to save the file
+        path_destination: str = f"uploads/{file.filename}"
+        os.makedirs(os.path.dirname(path_destination), exist_ok=True)
+        
+        # Read the file content once
+        file_content = await file.read()
+        
+        # Save the file to the local filesystem
+        with open(path_destination, "wb") as f:
+            f.write(file_content)
+
+        # Save the file to MongoDB
+        db: MongoClient = mongoDB_connection()
+        fs: GridFS = GridFS(db['nlp-vitae'], collection='documents')
+        file_id: uuid.UUID = uuid.uuid4()
+        encoded_content: bytes = base64.b64encode(file_content)
+        file_base64_id = fs.put(encoded_content, filename=file.filename)
+
+        # Save metadata in MongoDB
+        coll = db['pdf-handler']['files']
+        file_document = {
+            "file_id": str(file_id),
+            "file_base64_id": str(file_base64_id),
+            "name": file.filename
+        }
+        coll.insert_one(file_document)
+
+        return JSONResponse(
+            status_code=200,
+            content={'message': f'File {file.filename} saved successfully and loaded in MongoDB.'}
+        )
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={'message': f'An exception occurred: {err}'}
+        )
