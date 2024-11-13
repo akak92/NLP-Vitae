@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  api:
+    build:
+      context: ./Services/API
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8888:8888
+    command: "python app.py"
+
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - ./Services/Mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: nlpadmin
+      MONGO_INITDB_ROOT_PASSWORD: nlppass
