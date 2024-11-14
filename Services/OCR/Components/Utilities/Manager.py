@@ -18,7 +18,7 @@ class Manager:
                 sort=[('creation_date', 1)]
             )
             if file:
-                print(f"File found. file_id: {file['file_id']}. Starting text extraction...")
+                print(f"File found. file_id: {file['file_id']}. Starting text extraction ...")
                 self.worker.process(file_id=file['file_id'])
             else:
                 print('No file found matching the criteria.')

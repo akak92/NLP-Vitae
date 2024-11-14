@@ -1,50 +1,64 @@
 from datetime import datetime as dt
 from Components.Mongo.mongo_connection import mongoDB_connection
 from pymongo import MongoClient
-from gridfs import GridFS
-from bson import ObjectId
-import base64
-import pytesseract
-from pdf2image import convert_from_bytes
+from transformers import pipeline, AutoModelForTokenClassification, AutoTokenizer
 
 class Worker:
 
     def process(self, file_id: str):
         try:
             db: MongoClient = mongoDB_connection()
-            database = db['nlp-vitae']  # Seleccionar la base de datos
-            coll = database['files']  # Seleccionar la colección
-            init_time:dt = dt.now()
+            database = db['nlp-vitae']
+            coll = database['files']
+            init_time: dt = dt.now()
             file = coll.find_one({'file_id': file_id})
 
             if file:
-                file_base64_id: str = file['file_base64_id']
-                fs: GridFS = GridFS(database, collection='documents')  # Pasar la base de datos en lugar del cliente
-                file = fs.find_one({'_id': ObjectId(file_base64_id)})
-                file_content: bytes = file.read()
-                decoded_content = base64.b64decode(file_content)
+                path: str = './Model'
+                model = AutoModelForTokenClassification.from_pretrained(path)
+                tokenizer = AutoTokenizer.from_pretrained(path)
 
-                print('Converting to Images in order to use Tesseract...')
-                full_text: str = ""
+                ner_model = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+                text: str = file['results'][0]['data']
+                
+                # Usamos max_length para tokens = 256
+                max_length = 256
 
-                # Convertir el contenido decodificado (PDF) en imágenes
-                pages = convert_from_bytes(decoded_content)
+                inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=max_length)
+                
+                input_ids = inputs['input_ids'][0]
 
-                # Extraer texto de cada página
-                for page in pages:
-                    text = pytesseract.image_to_string(page, lang='spa')
-                    full_text += text + "\n\n"
+                if len(input_ids) > max_length:
+                    print(f"Truncating tokens, total tokens: {len(input_ids)}")
+                    input_ids = input_ids[:max_length]
+
+                chunk_size = max_length - 2  # Restamos 2 para los tokens [CLS] y [SEP]
+                chunks = [input_ids[i:i + chunk_size] for i in range(0, len(input_ids), chunk_size)]
+
+                # Almacenar los resultados de cada fragmento
+                all_entities = []
+
+                for chunk in chunks:
+                    chunk_text = tokenizer.decode(chunk, skip_special_tokens=True)
+                    entities = ner_model(chunk_text)
+                    all_entities.extend(entities)
+
+                filtered_entities = [
+                    {**entity, 'score': float(entity['score'])}
+                    for entity in all_entities if entity['score'] >= 0.95 and len(entity['word']) > 3
+                ]
 
                 end_time: dt = dt.now()
                 duration: float = (end_time - init_time).total_seconds()
                 coll.find_one_and_update(
                     {'file_id': file_id},
                     {'$push': { 'results' : {
-                        'process' : 'OCR',
-                        'data' : full_text,
+                        'process' : 'NER',
+                        'data' : filtered_entities,
                         'duration' : duration
                     }
                     }})
+
                 print(f'File with file_id: {file_id} processed correctly.')
             else:
                 print("No file found with the given file_id.")

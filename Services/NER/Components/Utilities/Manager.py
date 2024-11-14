@@ -10,6 +10,18 @@ class Manager:
     def search_for_files(self):
         try:
             print('Searching for oldest File to start processing (NER) ...')
+            db : MongoClient = mongoDB_connection()
+            coll = db['nlp-vitae']['files']
+
+            file = coll.find_one(
+                {'results.0': {'$exists': True}, 'results.1': {'$exists': False}},
+                sort=[('creation_date', 1)]
+            )
+            if file:
+                print(f"File found. file_id: {file['file_id']}. Starting text recognition...")
+                self.worker.process(file_id=file['file_id'])
+            else:
+                print('No file found matching the criteria.')
         except Exception as err:
             print(f'An exception ocurred: {err}')
     
