@@ -6,7 +6,6 @@ click==8.1.7
 fastapi==0.115.5
 filelock==3.16.1
 fsspec==2024.10.0
-h11==0.14.0
 huggingface-hub==0.26.2
 idna==3.10
 Jinja2==3.1.4
@@ -34,3 +33,4 @@ transformers==4.46.2
 typing_extensions==4.12.2
 urllib3==2.2.3
 uvicorn==0.32.0
+pymongo

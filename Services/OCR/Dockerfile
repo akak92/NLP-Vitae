@@ -12,6 +12,8 @@ RUN apt-get update && \
     tesseract-ocr-spa && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y poppler-utils
+
 # Establecer el directorio de trabajo en el contenedor
 WORKDIR /app
 

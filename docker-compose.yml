@@ -8,16 +8,31 @@ services:
     restart: unless-stopped
     ports:
       - 8888:8888
-    command: uvicorn app:app --reload --host 0.0.0.0 --port 8888
+    command: uvicorn app:app --host 0.0.0.0 --port 8888
 
   ocr:
     build:
       context: ./Services/OCR
       dockerfile: Dockerfile
     restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: 1
     ports:
       - 8880:8880
-    command: uvicorn app:app --reload --host 0.0.0.0 --port 8880
+    tty: true
+    command: uvicorn app:app --host 0.0.0.0 --port 8880 --log-level debug
+
+  ner:
+    build:
+      context: ./Services/NER
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - 8881:8881
+    tty: true
+    command: uvicorn app:app --host 0.0.0.0 --port 8880 --log-level debug
 
   mongo:
     image: mongo:latest

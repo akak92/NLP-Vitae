@@ -6,8 +6,11 @@ import os
 import uuid
 import base64
 from Components.Mongo.mongo_connection import mongoDB_connection
+from Components.Files.file import router as file_router
+from datetime import datetime as dt
 
 app = FastAPI(title='API for NLP-Vitae application')
+app.include_router(file_router, prefix='/file')
 
 @app.get('/health', summary='Health check endpoint', description="Returns OK value if the service is up.", tags=['Health'])
 async def health() -> JSONResponse:
@@ -20,30 +23,28 @@ async def health() -> JSONResponse:
 @app.post('/upload', summary='Upload a PDF file and save it in MongoDB', description="Returns OK if the file is uploaded correctly", tags=['Upload'])
 async def upload(file: UploadFile = File(...)) -> JSONResponse:
     try:
-        # Define the path to save the file
         path_destination: str = f"uploads/{file.filename}"
         os.makedirs(os.path.dirname(path_destination), exist_ok=True)
         
-        # Read the file content once
-        file_content = await file.read()
+        file_content: bytes = await file.read()
         
-        # Save the file to the local filesystem
         with open(path_destination, "wb") as f:
             f.write(file_content)
 
-        # Save the file to MongoDB
         db: MongoClient = mongoDB_connection()
         fs: GridFS = GridFS(db['nlp-vitae'], collection='documents')
         file_id: uuid.UUID = uuid.uuid4()
         encoded_content: bytes = base64.b64encode(file_content)
         file_base64_id = fs.put(encoded_content, filename=file.filename)
 
-        # Save metadata in MongoDB
-        coll = db['pdf-handler']['files']
+        creation: dt = dt.now()
+        coll = db['nlp-vitae']['files']
         file_document = {
             "file_id": str(file_id),
             "file_base64_id": str(file_base64_id),
-            "name": file.filename
+            "name": file.filename,
+            "creation_date": creation.strftime("%d-%m-%Y %H:%M:%S"),
+            "results" : []
         }
         coll.insert_one(file_document)
 
