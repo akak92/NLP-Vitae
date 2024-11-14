@@ -2,11 +2,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from threading import Thread
-#from Components.Utilities.Timer import CustomTimer
-#from Components.Utilities.Manager import Manager
-#from Components.Utilities.Worker import Worker
+from Components.Utilities.Timer import CustomTimer
+from Components.Utilities.Manager import Manager
+from Components.Utilities.Worker import Worker
 
-#_timer: CustomTimer = CustomTimer(manager=Manager(worker=Worker()))
+_timer: CustomTimer = CustomTimer(manager=Manager(worker=Worker()))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,15 +18,15 @@ async def lifespan(app: FastAPI):
 def onStart():
     try:
         print('Initializing Task (Thread).')
-#        _timer.interval = 5
-#        _timer.start()
+        _timer.interval = 5
+        _timer.start()
     except Exception as ex:
         print(f'An exception ocurred: {ex}')
 
 def onStop():
     try:
         print('Ending Task (Thread).')
-#        _timer.stop()
+        _timer.stop()
     except Exception as ex:
         print(f'An exception ocurred: {ex}')
 

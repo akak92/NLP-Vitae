@@ -20,4 +20,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Extraemos el archivo model.safetensors si es necesario
-RUN 7z x /app/Model/model.safetensors.zip -o/app/Model
+RUN 7z x /app/Model/model.zip.001 -o/app/Model
