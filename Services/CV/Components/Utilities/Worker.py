@@ -45,8 +45,7 @@ class Worker:
 
                         if self._face_detection(image=image_rgb):
                             profile_pic = image_rgb
-                            picture_id: uuid = uuid.uuid4()
-                            self._save_profile_picture(profile_pic, database)
+                            picture_id = self._save_profile_picture(profile_pic, database)
                             end_time: dt = dt.now()
                             duration = (end_time - init_time).total_seconds()
 
@@ -54,19 +53,30 @@ class Worker:
                             {'file_id': file_id},
                             {'$push': { 'results' : {
                                 'process' : 'CV',
-                                'data' : f'Profile pictured extracted with name: {file_id}.jpg',
+                                'data' : f'Profile pictured extracted with _id: {str(picture_id)}',
                                 'duration' : duration
                             }
                             }})
 
                             coll.find_one_and_update(
                                 {'file_id': file_id},
-                                {'picture_id' : str(picture_id)}
+                                {'$set': {'picture_id': str(picture_id)}}
                             )
                             print(f'Profile picture found and saved. Stopping further processing.')
                             return
-
+                        
+                end_time: dt = dt.now()
+                duration = (end_time - init_time).total_seconds()
+                coll.find_one_and_update(
+                {'file_id': file_id},
+                {'$push': { 'results' : {
+                    'process' : 'CV',
+                    'data' : f'No profile pictured found in file with file_id {file_id}.',
+                    'duration' : duration
+                }
+                }})
                 print(f'No profile picture detected in file_id: {file_id}.')
+
             else:
                 print("No file found with the given file_id.")
                 return None
@@ -84,11 +94,12 @@ class Worker:
             img_byte_array = io.BytesIO()
             image.save(img_byte_array, format='JPEG')
             img_byte_array = img_byte_array.getvalue()
+            picture_id_name: uuid = uuid.uuid4()
 
-            # Usar GridFS para guardar la imagen
-            fs_pictures = GridFS(database, collection='picture')  # Usar la base de datos correcta
-            file_id = fs_pictures.put(img_byte_array, content_type='image/jpeg', filename=f'{file_id}.jpg')
+            fs_pictures = GridFS(database, collection='picture')
+            picture_id = fs_pictures.put(img_byte_array, content_type='image/jpeg', filename=f'{str(picture_id_name)}.jpg')
 
-            print(f'Profile picture saved with file_id: {file_id}')
+            print(f'Profile picture saved with file_id: {picture_id}')
+            return picture_id
         except Exception as e:
             print(f'Error saving profile picture: {e}')

@@ -50,7 +50,8 @@ async def upload(file: UploadFile = File(...)) -> JSONResponse:
 
         return JSONResponse(
             status_code=200,
-            content={'message': f'File {file.filename} saved successfully and loaded in MongoDB.'}
+            content={'message': f'File {file.filename} created successfully and loaded in MongoDB.',
+                     'file_id' : str(file_id)}
         )
 
     except Exception as err:
