@@ -1,5 +1,5 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse, StreamingResponse
 from pymongo import MongoClient
 from gridfs import GridFS
 import os
@@ -8,6 +8,8 @@ import base64
 from Components.Mongo.mongo_connection import mongoDB_connection
 from Components.Files.file import router as file_router
 from datetime import datetime as dt
+from bson import ObjectId
+import io
 
 app = FastAPI(title='API for NLP-Vitae application')
 app.include_router(file_router, prefix='/file')
@@ -54,6 +56,37 @@ async def upload(file: UploadFile = File(...)) -> JSONResponse:
                      'file_id' : str(file_id)}
         )
 
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={'message': f'An exception occurred: {err}'}
+        )
+    
+@app.get('/download/{file_id}', summary='Download a PDF file based on file_id provided.', description="Returns a PDF File.", tags=['Download'])
+async def download(file_id: str):
+    try:
+        # Conexión a MongoDB
+        db: MongoClient = mongoDB_connection()
+        database = db['nlp-vitae']
+        coll = database['files']
+        
+        file = coll.find_one({'file_id': file_id})
+        if not file:
+            raise HTTPException(status_code=404, detail="File not found")
+
+        fs: GridFS = GridFS(database, collection='documents')
+        pdf = fs.find_one({'_id': ObjectId(file['file_base64_id'])})
+        if not pdf:
+            raise HTTPException(status_code=404, detail="PDF not found in GridFS")
+        
+        pdf_content: bytes = pdf.read()
+        decoded_content: bytes = base64.b64decode(pdf_content)
+
+        return StreamingResponse(
+            io.BytesIO(decoded_content),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={pdf.filename}"}
+        )
     except Exception as err:
         return JSONResponse(
             status_code=500,
