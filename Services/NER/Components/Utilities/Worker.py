@@ -5,6 +5,11 @@ from transformers import pipeline, AutoModelForTokenClassification, AutoTokenize
 
 class Worker:
 
+    def __init__(self):
+        self.model_path = './Model'
+        self.model = AutoModelForTokenClassification.from_pretrained(self.model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+
     def process(self, file_id: str):
         try:
             db: MongoClient = mongoDB_connection()
@@ -15,16 +20,14 @@ class Worker:
 
             if file:
                 path: str = './Model'
-                model = AutoModelForTokenClassification.from_pretrained(path)
-                tokenizer = AutoTokenizer.from_pretrained(path)
 
-                ner_model = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+                ner_model = pipeline("ner", model=self.model, tokenizer=self.tokenizer, aggregation_strategy="simple")
                 text: str = file['results'][0]['data']
                 
                 # Usamos max_length para tokens = 256
                 max_length = 256
 
-                inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=max_length)
+                inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=max_length)
                 
                 input_ids = inputs['input_ids'][0]
 
@@ -39,7 +42,7 @@ class Worker:
                 all_entities = []
 
                 for chunk in chunks:
-                    chunk_text = tokenizer.decode(chunk, skip_special_tokens=True)
+                    chunk_text = self.tokenizer.decode(chunk, skip_special_tokens=True)
                     entities = ner_model(chunk_text)
                     all_entities.extend(entities)
 
@@ -66,3 +69,14 @@ class Worker:
         except Exception as err:
             print(f'An exception occurred: {err}')
             return None
+
+    def model_info(self):
+        model_info = {
+            "model_name": self.model.config.model_type,
+            "model_architecture": self.model.config.architectures,
+            "num_labels": self.model.config.num_labels,
+            "tokenizer_vocab_size": len(self.tokenizer),
+            "model_path": self.model_path,
+            "model_loaded": True,
+        }
+        return model_info

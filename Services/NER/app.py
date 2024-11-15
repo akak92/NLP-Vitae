@@ -38,3 +38,17 @@ def health() -> JSONResponse:
         status_code=200,
         content={'status' : 'NER Service is OK'}
     )
+
+@app.get('/model', summary='Model Information', description='Returns details of model version used', tags=['Model'])
+def tversion() -> JSONResponse:
+    try:
+        worker: Worker = Worker()
+        return JSONResponse(
+            status_code= 200,
+            content={'message' : f'Model: {worker.model_info()}'}
+        )
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content = {'message' : f'An exception ocurred: {err}'}
+        )
