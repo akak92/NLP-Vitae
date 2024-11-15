@@ -9,7 +9,7 @@ from PIL import Image
 import io
 import numpy as np
 import base64
-
+import uuid
 class Worker:
 
     def process(self, file_id: str):
@@ -45,6 +45,7 @@ class Worker:
 
                         if self._face_detection(image=image_rgb):
                             profile_pic = image_rgb
+                            picture_id: uuid = uuid.uuid4()
                             self._save_profile_picture(profile_pic, database)
                             end_time: dt = dt.now()
                             duration = (end_time - init_time).total_seconds()
@@ -57,6 +58,11 @@ class Worker:
                                 'duration' : duration
                             }
                             }})
+
+                            coll.find_one_and_update(
+                                {'file_id': file_id},
+                                {'picture_id' : str(picture_id)}
+                            )
                             print(f'Profile picture found and saved. Stopping further processing.')
                             return
 
