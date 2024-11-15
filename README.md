@@ -1,5 +1,5 @@
 # NLP-Vitae
-Automated extraction of key information from resumes using OCR and Named Entity Recognition (NER) for streamlined data integration.
+Automated extraction of key information from resumes using OCR and Named Entity Recognition (NER) for streamlined data integration. Also extract photo's using face recognition.
 
 ### Languages / Frameworks used:
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
