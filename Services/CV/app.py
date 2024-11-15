@@ -36,5 +36,5 @@ app = FastAPI(title='Swagger for CV Service of NLP-Vitae', lifespan=lifespan)
 def health() -> JSONResponse:
     return JSONResponse(
         status_code=200,
-        content={'status' : 'NER Service is OK'}
+        content={'status' : 'CV Service is OK'}
     )
