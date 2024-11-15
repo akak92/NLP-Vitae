@@ -45,7 +45,7 @@ class Worker:
 
                 filtered_entities = [
                     {**entity, 'score': float(entity['score'])}
-                    for entity in all_entities if entity['score'] >= 0.95 and len(entity['word']) > 3
+                    for entity in all_entities if entity['score'] >= 0.90 and len(entity['word']) > 3
                 ]
 
                 end_time: dt = dt.now()
