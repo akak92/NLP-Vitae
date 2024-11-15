@@ -14,7 +14,7 @@ class Manager:
             coll = db['nlp-vitae']['files']
 
             file = coll.find_one(
-                {'results.0': {'$exists': True}, 'results.1': {'$exists': True}},
+                {'results.0': {'$exists': True}, 'results.1': {'$exists': True}, 'results.2': {'$exists' : False}},
                 sort=[('creation_date', 1)]
             )
             if file:
