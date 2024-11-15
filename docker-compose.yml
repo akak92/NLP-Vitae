@@ -34,6 +34,18 @@ services:
     tty: true
     command: uvicorn app:app --host 0.0.0.0 --port 8881 --log-level debug
 
+  cv:
+    build:
+      context: ./Services/CV
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: 1
+    ports:
+      - 8881:8881
+    tty: true
+    command: uvicorn app:app --host 0.0.0.0 --port 8882 --log-level debug
+
   mongo:
     image: mongo:latest
     restart: unless-stopped
