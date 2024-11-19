@@ -10,8 +10,16 @@ from Components.Files.file import router as file_router
 from datetime import datetime as dt
 from bson import ObjectId
 import io
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title='API for NLP-Vitae application')
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # En producción, especifica los dominios permitidos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(file_router, prefix='/file')
 
 @app.get('/health', summary='Health check endpoint', description="Returns OK value if the service is up.", tags=['Health'])

@@ -6,6 +6,33 @@ from datetime import datetime as dt
 
 router = APIRouter()
 
+@router.get('/all', summary= 'Returns all files', description= 'Retrieves information for every file present in MongoDB', tags=['Files'])
+def get_files():
+    try:
+        db: MongoClient = mongoDB_connection()
+        coll = db['nlp-vitae']['files']
+        
+        files = list(coll.find())
+
+        if files:
+            for file in files:
+                file['_id'] = str(file['_id'])
+
+            return JSONResponse(
+                status_code=200,
+                content={'data': files}
+            )
+        else:
+            return JSONResponse(
+                status_code=404,
+                content={'message': 'No files found'}
+            )
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={'message': f'An exception occurred: {err}'}
+        )
+
 @router.get('/filter/id/{file_id}', summary= 'Returns an specific file information', description='It retrieves a file information from MongoDB', tags=['Files'])
 def get_file(file_id: str):
     try:
