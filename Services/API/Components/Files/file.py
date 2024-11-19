@@ -12,7 +12,7 @@ def get_files():
         db: MongoClient = mongoDB_connection()
         coll = db['nlp-vitae']['files']
         
-        files = list(coll.find())
+        files = list(coll.find().sort('creation_date', -1))
 
         if files:
             for file in files:

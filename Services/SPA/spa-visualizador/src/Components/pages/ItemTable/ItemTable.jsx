@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from "react-router-dom";
 
 const ItemTable = () => {
   const [data, setData] = useState([]);
@@ -35,8 +36,9 @@ const ItemTable = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <div style={tableContainerStyle}>
+      <h3>Processed Documents</h3>
+      <table style={tableStyle}>
         <thead>
           <tr>
             <th style={headerStyle}>File ID</th>
@@ -44,6 +46,7 @@ const ItemTable = () => {
             <th style={headerStyle}>Name</th>
             <th style={headerStyle}>Creation Date</th>
             <th style={headerStyle}>Picture ID</th>
+            <th style={headerStyle}>Results</th>
           </tr>
         </thead>
         <tbody>
@@ -55,11 +58,16 @@ const ItemTable = () => {
                 <td style={cellStyle}>{item.name}</td>
                 <td style={cellStyle}>{item.creation_date}</td>
                 <td style={cellStyle}>{item.picture_id}</td>
+                <td style={cellStyle}>
+                  <Link to={`/file/${item.file_id}`} style={linkStyle}>
+                    View info
+                  </Link>
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="5" style={emptyStyle}>
+              <td colSpan="6" style={emptyStyle}>
                 No data available
               </td>
             </tr>
@@ -70,16 +78,34 @@ const ItemTable = () => {
   );
 };
 
-// Estilos básicos para la tabla
+// Estilos para asegurar que el contenedor de la tabla ocupe todo el espacio disponible
+const tableContainerStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-start', // Alineación al principio del contenedor
+  height: '100vh', // Asegura que el contenedor ocupe el 100% de la altura de la ventana
+  padding: '10px',
+  boxSizing: 'border-box',
+};
+
+const tableStyle = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  height: '100%',
+};
+
 const headerStyle = {
-  backgroundColor: '#f4f4f4',
+  backgroundColor: '#000000',
+  color: '#FFFFFF',
   padding: '10px',
   textAlign: 'left',
   border: '1px solid #ddd',
+  fontFamily: 'Roboto, sans-serif',
 };
 
 const rowStyle = {
   borderBottom: '1px solid #ddd',
+  fontFamily: 'Roboto, sans-serif',
 };
 
 const cellStyle = {
@@ -91,6 +117,12 @@ const emptyStyle = {
   padding: '10px',
   textAlign: 'center',
   fontStyle: 'italic',
+};
+
+const linkStyle = {
+  color: '#007BFF',
+  textDecoration: 'none',
+  cursor: 'pointer',
 };
 
 export default ItemTable;
