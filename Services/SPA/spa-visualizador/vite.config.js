@@ -10,6 +10,16 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/file/filter/id': {
+        target: 'http://api:8888', // Endpoint para /file/filter/id
+        changeOrigin: true,
+        secure: false,
+      },
+      '/download': {
+        target: 'http://api:8888', // Endpoint para /file/filter/id
+        changeOrigin: true,
+        secure: false,
+      },
       '/tversion': {
         target: 'http://ocr:9000', // Endpoint para /tversion
         changeOrigin: true,

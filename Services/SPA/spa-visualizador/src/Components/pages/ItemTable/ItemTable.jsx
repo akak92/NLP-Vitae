@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const ItemTable = () => {
   const [data, setData] = useState([]);
@@ -38,60 +38,69 @@ const ItemTable = () => {
   return (
     <div style={tableContainerStyle}>
       <h3>Processed Documents</h3>
-      <table style={tableStyle}>
-        <thead>
-          <tr>
-            <th style={headerStyle}>File ID</th>
-            <th style={headerStyle}>File Base64 ID</th>
-            <th style={headerStyle}>Name</th>
-            <th style={headerStyle}>Creation Date</th>
-            <th style={headerStyle}>Picture ID</th>
-            <th style={headerStyle}>Results</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data && data.length > 0 ? (
-            data.map((item, index) => (
-              <tr key={index} style={rowStyle}>
-                <td style={cellStyle}>{item.file_id}</td>
-                <td style={cellStyle}>{item.file_base64_id}</td>
-                <td style={cellStyle}>{item.name}</td>
-                <td style={cellStyle}>{item.creation_date}</td>
-                <td style={cellStyle}>{item.picture_id}</td>
-                <td style={cellStyle}>
-                  <Link to={`/file/${item.file_id}`} style={linkStyle}>
-                    View info
-                  </Link>
+      {/* Contenedor con scroll */}
+      <div style={scrollContainerStyle}>
+        <table style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={headerStyle}>File ID</th>
+              <th style={headerStyle}>File Base64 ID</th>
+              <th style={headerStyle}>Name</th>
+              <th style={headerStyle}>Creation Date</th>
+              <th style={headerStyle}>Picture ID</th>
+              <th style={headerStyle}>Results</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data && data.length > 0 ? (
+              data.map((item, index) => (
+                <tr key={index} style={rowStyle}>
+                  <td style={cellStyle}>{item.file_id}</td>
+                  <td style={cellStyle}>{item.file_base64_id}</td>
+                  <td style={cellStyle}>{item.name}</td>
+                  <td style={cellStyle}>{item.creation_date}</td>
+                  <td style={cellStyle}>{item.picture_id}</td>
+                  <td style={cellStyle}>
+                    <Link to={`/file/${item.file_id}`} style={linkStyle}>
+                      View info
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={emptyStyle}>
+                  No data available
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" style={emptyStyle}>
-                No data available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
-// Estilos para asegurar que el contenedor de la tabla ocupe todo el espacio disponible
+// Estilos
 const tableContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'flex-start', // Alineación al principio del contenedor
-  height: '100vh', // Asegura que el contenedor ocupe el 100% de la altura de la ventana
+  justifyContent: 'flex-start',
+  height: '100vh',
   padding: '10px',
   boxSizing: 'border-box',
+};
+
+const scrollContainerStyle = {
+  maxHeight: '400px',
+  overflow: 'auto',
+  border: '1px solid #ddd',
+  marginTop: '10px',
 };
 
 const tableStyle = {
   width: '100%',
   borderCollapse: 'collapse',
-  height: '100%',
 };
 
 const headerStyle = {
@@ -101,6 +110,9 @@ const headerStyle = {
   textAlign: 'left',
   border: '1px solid #ddd',
   fontFamily: 'Roboto, sans-serif',
+  position: 'sticky', // Hace que el encabezado se mantenga fijo
+  top: 0, // Fija la posición superior del encabezado
+  zIndex: 1, // Asegura que el encabezado esté por encima del contenido
 };
 
 const rowStyle = {
@@ -126,3 +138,4 @@ const linkStyle = {
 };
 
 export default ItemTable;
+

@@ -75,6 +75,10 @@ class Worker:
                     'duration' : duration
                 }
                 }})
+                coll.find_one_and_update(
+                    {'file_id': file_id},
+                    {'$set': {'picture_id': 'No profile picture was found.'}}
+                )
                 print(f'No profile picture detected in file_id: {file_id}.')
 
             else:
