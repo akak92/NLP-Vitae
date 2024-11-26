@@ -68,11 +68,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: nlpadmin
       MONGO_INITDB_ROOT_PASSWORD: nlppass
 
-#  spa-visualizador:
-#    build:
-#      context: ./Services/SPA/spa-visualizador
-#      dockerfile: Dockerfile
-#    ports:
-#      - 5173:5173
-#    stdin_open: true
-#    tty: true
+  spa:
+    build:
+      context: ./Services/SPA
+      dockerfile: Dockerfile
+    ports:
+      - 5173:5173
+    stdin_open: true
+    tty: true
