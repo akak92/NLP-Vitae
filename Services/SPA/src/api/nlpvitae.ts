@@ -1,5 +1,10 @@
 import { api } from './client'
+import { useSettings } from '../state/settings'
 export type AnyJson = unknown
+
+function base() {
+  return useSettings.getState().baseUrl
+}
 
 export const FilesAPI = {
   getAll: () => api.get<AnyJson>('/file/all'),
@@ -18,8 +23,10 @@ export const UploadAPI = {
 }
 
 export const DownloadAPI = {
-  url: (file_id: string) => {
-    const base = (window as any).BASE_URL_OVERRIDE || (import.meta as any).env.VITE_API_BASE_URL
-    return `${base}/download/${encodeURIComponent(file_id)}`
-  }
+  url: (file_id: string) => `${base()}/download/${encodeURIComponent(file_id)}`
+}
+
+export const PictureAPI = {
+  byFile: (file_id: string) => `${base()}/file/picture/by-file/${encodeURIComponent(file_id)}`,
+  byId:   (picture_id: string) => `${base()}/file/picture/${encodeURIComponent(picture_id)}`
 }

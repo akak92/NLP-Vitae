@@ -1,14 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { FilesAPI, HealthAPI, UploadAPI, DownloadAPI } from '../api/nlpvitae'
+import { FilesAPI, HealthAPI, UploadAPI, DownloadAPI, PictureAPI } from '../api/nlpvitae'
 import { useMemo, useState } from 'react'
 import DataTable, { Column } from '../components/DataTable'
 import Modal from '../components/Modal'
-import JSONPretty from '../components/JSONPretty'
 import ExtractedView from '../components/ExtractedView';
+import Avatar from '../components/Atavar'
 
-
-
-// === helpers NUEVOS (arriba del componente) ===
 type AnyRec = Record<string, any>;
 
 function entriesFrom(x: unknown): any[] {
@@ -51,12 +48,16 @@ function normalize(rows: any[]): {
     const id = r.file_id ?? r._id ?? r.id ?? r.uuid;
     const name = r.name ?? r.filename ?? r.file_name ?? '—';
     const created = r.creation_date ?? r.created_at ?? r.created ?? r.date ?? '—';
-    // Si hay results asumimos "Procesado"
-    const status = r.status ?? (Array.isArray(r.results) ? 'Procesado' : '—');
+
+    // "Procesado" si picture_id tiene un valor; si es null/undefined (o no existe), "Procesando"
+    const status = r.picture_id != null ? 'Procesado' : 'Procesando';
+
     const extracted = pickNERData(r) ?? r.extracted ?? r.entities ?? r.result ?? r.data;
     return { id, name, created, status, raw: r, extracted };
   });
 }
+
+
 
 export default function Home(){
   const qc = useQueryClient()
@@ -73,6 +74,9 @@ export default function Home(){
   const [viewerTitle, setViewerTitle] = useState('')
   const [viewerData, setViewerData] = useState<any>(null)
 
+  const [viewerPicUrl, setViewerPicUrl] = useState<string | undefined>(undefined)
+
+
   const rows = useMemo(() => {
     const arr = entriesFrom(filesQ.data);
     return normalize(arr);
@@ -82,19 +86,49 @@ export default function Home(){
     { header: 'Archivo', cell: r => r.name ?? '—' },
     { header: 'Fecha', cell: r => r.created ?? '—', className: 'whitespace-nowrap' },
     { header: 'Estado', cell: r => {
-        const text = (r.status===true)?'Procesado':(r.status===false)?'Pendiente':(r.status ?? '—')
-        return <span className="badge">{String(text)}</span>
-      }},
+        const isDone = r.status === 'Procesado'
+        const cls = isDone
+          ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-700 dark:text-emerald-100'
+          : 'bg-yellow-200 text-yellow-900 dark:bg-yellow-600 dark:text-yellow-100'
+        return (
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${cls}`}>
+            {r.status}
+          </span>
+        )
+      }
+    },
     { header: 'Acciones', cell: r => (
-        <div className="flex gap-2">
-          <button className="btn" onClick={()=>{
+      <div className="flex gap-2">
+        <button
+          className="btn"
+          onClick={()=>{
             setViewerTitle(`Datos extraídos${r.name?` · ${r.name}`:''}`)
             setViewerData(r.extracted ?? r.raw)
+
+            // 1) armá la URL en una variable local
+            const picId = r.raw?.picture_id
+            const url = picId
+              ? PictureAPI.byId(String(picId))
+              : (r.id ? PictureAPI.byFile(String(r.id)) : undefined)
+
+            // 2) logueá la URL local (NO el state)
+            console.log('pic url:', url, 'doc:', r.raw)
+
+            // 3) recién ahora actualizá el state
+            setViewerPicUrl(url)
             setViewerOpen(true)
-          }}>Ver datos</button>
-          {r.id && <a className="btn" href={DownloadAPI.url(String(r.id))} target="_blank" rel="noreferrer">Descargar</a>}
-        </div>
-      )}
+          }}
+        >
+          Ver datos
+        </button>
+        {r.id && (
+          <a className="btn" href={DownloadAPI.url(String(r.id))} target="_blank" rel="noreferrer">
+            Descargar
+          </a>
+        )}
+      </div>
+    )}
+
   ],[rows])
 
   return (
@@ -129,9 +163,27 @@ export default function Home(){
         )}
       </section>
 
-      <Modal open={viewerOpen} title={viewerTitle} onClose={()=>setViewerOpen(false)}>
-        <ExtractedView value={viewerData} />
-      </Modal>
+    <Modal open={viewerOpen} title={viewerTitle} onClose={()=>setViewerOpen(false)}>
+      <div className="relative">
+        {/* Avatar fijo arriba a la derecha */}
+        <Avatar
+          src={viewerPicUrl}
+          // Nombre para las iniciales (intenta tomar del JSON; si no, usa el título del modal)
+          name={(() => {
+            const dp = (viewerData as any)?.datos_personales
+            return dp?.name ?? dp?.nombre ?? viewerTitle
+          })()}
+          size={96}
+          rounded="xl"
+          className="absolute top-0 right-0"
+        />
+
+        {/* Dejamos espacio para que el contenido no quede debajo del avatar */}
+        <div className="pr-28">
+          <ExtractedView value={viewerData} pictureUrl={viewerPicUrl} />
+        </div>
+      </div>
+    </Modal>
     </div>
   )
 }

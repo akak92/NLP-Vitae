@@ -21,9 +21,9 @@ function normalize(ex: AnyRec) {
   const experiencia_laboral = ex.experiencia_laboral ?? ex.experiencia ?? ex['experiencia_laboral']
   const educacion = ex.educación ?? ex.educacion
   const habilidades = ex.habilidades_tecnicas ?? ex.habilidades ?? ex['habilidades_tecnicas'] ?? ex['habilidades_técnicas']
-  const idiomas = ex.idiomas ?? ex.idiomas // <- typo común
-  const certs = ex.certificaciones_y_cursos ?? ex.certificaciones ?? ex.cursos
-  const otros = ex.otros ?? ex.extra ?? ex.adicional
+  const idiomas = ex.idiomas ?? ex.idiomas ?? ex['idiomas'] // <- typo común
+  const certs = ex.certificaciones_y_cursos ?? ex.certificaciones ?? ex.cursos ?? ex['certificaciones_y_cursos']
+  const otros = ex.otros ?? ex.extra ?? ex.adicional ?? ex['otros']
 
   return { datos_personales, experiencia_laboral, educacion, habilidades, idiomas, certs, otros }
 }
@@ -46,7 +46,7 @@ function KV({ label, children }:{label:string; children: React.ReactNode}) {
   )
 }
 
-export default function ExtractedView({ value }:{ value: any }) {
+export default function ExtractedView({ value, pictureUrl }:{ value: any, pictureUrl?: string }) {
   // Si viene string (OCR crudo), mostralo simple:
   if (typeof value === 'string') {
     return <pre className="text-sm whitespace-pre-wrap">{value}</pre>
@@ -56,6 +56,27 @@ export default function ExtractedView({ value }:{ value: any }) {
   }
 
   const { datos_personales, experiencia_laboral, educacion, habilidades, idiomas, certs, otros } = normalize(value)
+
+  {pictureUrl && (
+    <div className="flex items-start gap-4">
+      <img
+        src={pictureUrl}
+        alt="Foto de perfil"
+        className="w-24 h-24 rounded-xl object-cover bg-slate-200"
+        onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+      />
+      {/* Si querés, podés dejar un resumen muy breve cuando hay imagen */}
+      {typeof value === 'object' && value?.datos_personales && (
+        <div className="text-sm">
+          <div className="font-semibold">{value.datos_personales.name ?? value.datos_personales.nombre ?? '—'}</div>
+          {value.datos_personales?.telefono && <div className="text-slate-500">{value.datos_personales.telefono}</div>}
+          {Array.isArray(value.datos_personales?.correo_electronico) && value.datos_personales.correo_electronico[0] && (
+            <div className="text-slate-500">{value.datos_personales.correo_electronico[0]}</div>
+          )}
+        </div>
+      )}
+    </div>
+  )}
 
   // Datos personales
   const nombre = datos_personales?.name ?? datos_personales?.nombre
