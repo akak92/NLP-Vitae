@@ -17,11 +17,11 @@ function periodToText(p?: AnyRec) {
 // Normaliza claves típicas de tu NER al español (y algún typo)
 function normalize(ex: AnyRec) {
   // soportá variantes y typos
-  const datos_personales = ex.datos_personales ?? ex['datos-personales'] ?? ex.personales
-  const experiencia_laboral = ex.experiencia_laboral ?? ex.experiencia ?? ex['experiencia-laboral']
+  const datos_personales = ex.datos_personales ?? ex['datos_personales'] ?? ex.personales
+  const experiencia_laboral = ex.experiencia_laboral ?? ex.experiencia ?? ex['experiencia_laboral']
   const educacion = ex.educación ?? ex.educacion
-  const habilidades = ex.habilidades_técnicas ?? ex.habilidades ?? ex['habilidades-tecnicas']
-  const idiomas = ex.idiomas ?? ex.idomas // <- typo común
+  const habilidades = ex.habilidades_tecnicas ?? ex.habilidades ?? ex['habilidades_tecnicas'] ?? ex['habilidades_técnicas']
+  const idiomas = ex.idiomas ?? ex.idiomas // <- typo común
   const certs = ex.certificaciones_y_cursos ?? ex.certificaciones ?? ex.cursos
   const otros = ex.otros ?? ex.extra ?? ex.adicional
 
