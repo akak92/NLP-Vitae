@@ -8,7 +8,7 @@ class LLM:
         self,
         base_url: str = "http://llm:11434",
         model: str = "llama3",
-        timeout: int = 30,
+        timeout: int = 800,
     ):
         self.base = base_url.rstrip("/")
         self.url_generate = f"{self.base}/api/generate"
