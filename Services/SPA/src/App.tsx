@@ -10,6 +10,8 @@ export default function App() {
         <nav className="flex gap-2 text-sm">
           <Link to="/" className={loc.pathname==='/'?'underline':''}>Inicio</Link>
           <span>·</span>
+          <Link to="/search" className={loc.pathname.startsWith('/search')?'underline':''}>Búsqueda</Link>
+          <span>·</span>
           <Link to="/settings" className={loc.pathname.startsWith('/settings')?'underline':''}>Ajustes</Link>
         </nav>
         <Outlet />

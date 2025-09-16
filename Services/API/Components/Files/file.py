@@ -3,6 +3,10 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from Components.Mongo.mongo_connection import mongoDB_connection
 from datetime import datetime as dt
+from typing import Literal
+import re
+from fastapi import Query
+
 
 router = APIRouter()
 
@@ -192,3 +196,87 @@ def get_picture_by_file(file_id: str, download: bool = False):
 
     except Exception as err:
         return JSONResponse(status_code=500, content={'message': f'An exception occurred: {err}'})
+
+@router.get(
+    '/filter/skills',
+    summary='Filtra archivos por habilidades técnicas',
+    description='Devuelve documentos cuyo NER contenga una o varias habilidades técnicas',
+    tags=['Files']
+)
+def get_files_by_skills(
+    skills: str = Query(..., description="Lista de habilidades separadas por coma, p.ej.: 'Angular, NodeJS, MongoDB'"),
+    mode: Literal['any', 'all'] = Query('any', description="'any' (al menos una) o 'all' (todas)"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200)
+):
+    """
+    Busca en la estructura:
+      results: [
+        { process: "NER", data: { habilidades_tecnicas: [ ... ] } },
+        ...
+      ]
+
+    - mode='any': al menos una habilidad coincide
+    - mode='all': deben coincidir todas
+    - Case-insensitive y tolera variaciones (usa regex escapado)
+    """
+    try:
+        # Parseo y sanitización de skills
+        skills_list = [s.strip() for s in skills.split(',') if s.strip()]
+        if not skills_list:
+            return JSONResponse(status_code=400, content={'message': 'Debe indicar al menos una habilidad'})
+
+        # Compilo regex case-insensitive escapando caracteres especiales (sirve para "C++", "CSS/Sass", etc.)
+        patterns = [re.compile(re.escape(s), re.IGNORECASE) for s in skills_list]
+
+        db: MongoClient = mongoDB_connection()
+        coll = db['nlp-vitae']['files']
+
+        elem_match = {'process': 'NER'}
+
+        # Armado de condición sobre el array data.habilidades_tecnicas del elemento NER
+        if mode == 'all':
+            elem_match['data.habilidades_tecnicas'] = {'$all': patterns}
+        else:
+            elem_match['data.habilidades_tecnicas'] = {'$in': patterns}
+
+        query = {'results': {'$elemMatch': elem_match}}
+
+        # Paginación
+        skip = (page - 1) * limit
+
+        total = coll.count_documents(query)
+        cursor = coll.find(query).sort('creation_date', -1).skip(skip).limit(limit)
+        files = list(cursor)
+
+        if not files:
+            return JSONResponse(
+                status_code=404,
+                content={'message': 'No files found', 'total': total, 'page': page, 'limit': limit}
+            )
+
+        for f in files:
+            f['_id'] = str(f['_id'])
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                'data': files,
+                'pagination': {
+                    'total': total,
+                    'page': page,
+                    'limit': limit,
+                    'pages': (total + limit - 1) // limit
+                },
+                'filters': {
+                    'skills': skills_list,
+                    'mode': mode
+                }
+            }
+        )
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={'message': f'An exception occurred: {err}'}
+        )

@@ -5,12 +5,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import Home from './pages/Home'
 import Settings from './pages/Settings'
+import Search from './pages/Search'
 import './index.css'
 
 const router = createBrowserRouter([
   { path: '/', element: <App />, children: [
     { index: true, element: <Home /> },
     { path: 'settings', element: <Settings /> },
+    { path: 'search', element: <Search /> },
   ]},
 ])
 
