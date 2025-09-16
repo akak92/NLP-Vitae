@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from threading import Thread
-import pytesseract
 from Components.Utilities.Timer import CustomTimer
 from Components.Utilities.Manager import Manager
 from Components.Utilities.Worker import Worker
@@ -51,7 +50,7 @@ def health() -> JSONResponse:
 @app.get('/tversion', summary='Tesseract version', description='Returns details of tesseract version installed', tags=['Tesseract'])
 def tversion() -> JSONResponse:
     try:
-        t_version: str = pytesseract.get_tesseract_version()
+        t_version: str = ""
         return JSONResponse(
             status_code= 200,
             content={'message' : str(t_version)}

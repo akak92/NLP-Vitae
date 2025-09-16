@@ -59,7 +59,6 @@ class LLM:
             "Responde SOLO con JSON, sin texto adicional."
         )
 
-    # ---------- Utils ----------
     @staticmethod
     def _shrink(text: str, max_chars: int = 12000) -> str:
         """Limpia ruido y recorta el texto para reducir riesgo de truncado por contexto."""
