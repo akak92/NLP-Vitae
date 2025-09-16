@@ -66,7 +66,7 @@ NLP-Vitae es una plataforma avanzada que utiliza técnicas de Procesamiento de L
         ▼              ▼       ▼       ▼              ▼
  ┌──────────┐  ┌──────────┐ ┌────┐ ┌──────────┐ ┌──────────┐
  │    OCR   │  │   NER    │ │ CV │ │   LLM    │ │  Timer   │
- │(Tesseract)│ │(PyTorch) │ │    │ │ (Ollama) │ │ Workers  │
+ │(Docling) │  │(PyTorch) │ │    │ │ (Ollama) │ │ Workers  │
  └──────────┘  └──────────┘ └────┘ └──────────┘ └──────────┘
 ```
 
@@ -79,10 +79,8 @@ NLP-Vitae es una plataforma avanzada que utiliza técnicas de Procesamiento de L
 - **Validación de datos**: Schemas con Pydantic
 
 #### 👁️ **Servicio OCR (Puerto 9000)**
-- **Tesseract Engine**: Extracción de texto de PDFs e imágenes
 - **Docling Integration**: Procesamiento avanzado de documentos
 - **Soporte multiidioma**: Español e inglés configurados
-- **API de versión**: Endpoint para verificar versión de Tesseract
 
 #### 🧠 **Servicio NER (Puerto 9001)**
 - **Modelo personalizado**: Red neuronal entrenada para CVs
@@ -238,13 +236,6 @@ El servicio NER utiliza un modelo personalizado entrenado para CVs. Para usar tu
 1. Reemplaza el archivo modelo en `Services/NER/Components/Model/`
 2. Actualiza la configuración en `Components/Model/LLM.py`
 3. Reconstruye el contenedor: `docker-compose build ner`
-
-### Configuración de Tesseract
-Para agregar más idiomas al OCR:
-
-1. Modifica el Dockerfile en `Services/OCR/`
-2. Agrega paquetes de idioma: `tesseract-ocr-fra tesseract-ocr-deu`
-3. Reconstruye: `docker-compose build ocr`
 
 ## 🔍 API Reference
 
