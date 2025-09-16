@@ -18,7 +18,7 @@ NLP-Vitae es una plataforma avanzada que utiliza técnicas de Procesamiento de L
 - **Puntuación de relevancia**: Algoritmo de scoring basado en coincidencias tecnológicas
 - **Interfaz visual atractiva**: Resultados con fotos de perfil y tags de tecnologías
 
-### 📊 **Interfaz de usuario moderna**
+### 📊 **Interfaz de usuario**
 - **SPA con React**: Aplicación de página única responsive
 - **Componentes reutilizables**: DataTable, Modal, SearchCards, ExtractedView
 - **Diseño profesional**: Tailwind CSS para un UI/UX moderno
@@ -169,7 +169,7 @@ NLP-Vitae/
 
 1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/akak92/NLP-Vitae.git
+git clone ESTE_REPOSITORIO
 cd NLP-Vitae
 ```
 
@@ -266,7 +266,7 @@ GET /file/picture/by-file/{file_id}      # Obtener imagen por archivo
 
 #### Health checks
 ```http
-GET /health        # Estado del API Gateway
+GET :8888/health   # Estado del API Gateway
 GET :9000/health   # Estado del servicio OCR
 GET :9001/health   # Estado del servicio NER
 GET :9002/health   # Estado del servicio CV
@@ -308,23 +308,6 @@ GET :9002/health   # Estado del servicio CV
 }
 ```
 
-## 🧪 Testing
-
-### Ejecutar tests unitarios
-```bash
-# API Gateway
-cd Services/API
-pip install -r requirements.txt
-pytest
-
-# Servicios individuales
-cd Services/OCR
-pytest
-
-cd Services/NER
-pytest
-```
-
 ### Test de integración
 ```bash
 # Verificar que todos los servicios respondan
@@ -334,62 +317,4 @@ curl http://localhost:9001/health
 curl http://localhost:9002/health
 ```
 
-## 🚧 Roadmap
-
-### Próximas características
-- [ ] **Autenticación y autorización**: Sistema de usuarios y roles
-- [ ] **API versioning**: Versionado semántico de endpoints
-- [ ] **Métricas y monitoreo**: Prometheus + Grafana
-- [ ] **CI/CD Pipeline**: GitHub Actions para deploy automático
-- [ ] **Búsqueda semántica**: Embeddings para búsqueda por similitud
-- [ ] **Exportación de datos**: CSV, Excel, JSON
-- [ ] **Plantillas de CV**: Generación automática de CVs
-- [ ] **Comparación de candidatos**: Vista lado a lado
-- [ ] **Análisis de sentimientos**: Evaluación del tono del CV
-- [ ] **Soporte multiidioma**: Interfaz en múltiples idiomas
-
-### Mejoras técnicas
-- [ ] **Kubernetes deployment**: Migración a orquestación K8s
-- [ ] **Cache Redis**: Optimización de consultas frecuentes
-- [ ] **Message Queue**: RabbitMQ para procesamiento asíncrono
-- [ ] **Backup automático**: Estrategia de respaldo de datos
-- [ ] **SSL/TLS**: Certificados para comunicación segura
-
-## 👥 Contribuir
-
-¡Las contribuciones son bienvenidas! Por favor:
-
-1. Haz fork del repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`)
-3. Commit tus cambios (`git commit -am 'Agregar nueva característica'`)
-4. Push a la rama (`git push origin feature/nueva-caracteristica`)
-5. Abre un Pull Request
-
-### Guía de contribución
-- Sigue las convenciones de código existentes
-- Agrega tests para nuevas funcionalidades
-- Actualiza la documentación cuando sea necesario
-- Usa mensajes de commit descriptivos
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## 🤝 Soporte
-
-¿Necesitas ayuda? Puedes:
-- Abrir un [issue](https://github.com/akak92/NLP-Vitae/issues) en GitHub
-- Revisar la [documentación de API](http://localhost:8888/docs) cuando tengas el sistema corriendo
-- Contactar al equipo de desarrollo
-
-## 🙏 Agradecimientos
-
-- **Tesseract OCR**: Por el motor de reconocimiento óptico
-- **Hugging Face**: Por los modelos pre-entrenados
-- **FastAPI**: Por el framework web moderno y rápido
-- **React Community**: Por el ecosistema de componentes
-- **MongoDB**: Por la base de datos flexible y escalable
-
 ---
-
-Desarrollado con ❤️ para hacer más eficiente el proceso de reclutamiento y análisis de talento.
